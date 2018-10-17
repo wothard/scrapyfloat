@@ -35,15 +35,14 @@ class GbrarSpider(scrapy.spiders.Spider):
         # 检查id匹配，并去除掉评论的url
         torrent_id_temp = response.xpath('//a[contains(@href,"/torrent/")]')
         torrent_id = torrent_id_temp.xpath('@href').extract()
-        print(len(torrent_id))
-        for i in range(26):
+        for i in range(len(torrent_id)-8):
             id = torrent_id[i+8].split("torrent/")[-1]
             if "comment" not in id:
                 torrent_address_f = "https://rarbgprx.org/download.php?id={}&f=".format(id)
                 torrent_address_f_list.append(torrent_address_f)
         # 完整的种子资源地址列表
-        print(torrent_address_f_list)
-        print(len(torrent_address_f_list),len(torrent_title))
+        # print(torrent_address_f_list[16])
+        # print(len(torrent_address_f_list),len(torrent_title))
         for i in range(25):
             torrent_titles = torrent_address_f_list[i] + torrent_title[i] + torrent_address_b
             self.torrent_file_list.append(torrent_titles)
