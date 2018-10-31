@@ -2,12 +2,12 @@
 # encoding: utf-8
 
 from lxml import html
+from random import choice
 import requests
 import json
 import os
 import telnetlib
 import threading
-import _thread
 import queue
 import time
 
@@ -20,20 +20,33 @@ headers = {
     }
 
 url_list = ["https://www.kuaidaili.com/free/inha/",
-            "http://ip.jiangxianli.com/?page="]
+            "http://ip.jiangxianli.com/?page=",
+            "https://ip.ihuan.me/?page="]
 ip_xpa_list = ['//td[@data-title="IP"]/text()',
-               '//tbody/tr/td[2]/text()']
+               '//tbody/tr/td[2]/text()',
+               '//table[contains(@class,"table-h")]/tbody/tr/td[1]/a/text()']
 port_xpa_list = ['//td[@data-title="PORT"]/text()',
-                 '//tbody/tr/td[3]/text()']
+                 '//tbody/tr/td[3]/text()',
+                 '//table[contains(@class,"table-h")]/tbody/tr/td[2]/text()']
 sta_xpa_list = ['//td[@data-title="类型"]/text()',
-                '//tbody/tr/td[5]/text()']
+                '//tbody/tr/td[5]/text()',
+                '//table[contains(@class,"table-h")]/tbody/tr/td[5]/text()']
+global_result = []
+list_page_code = ["b97827cc", "4ce63706", "5crfe930", "f3k1d581",
+                  "ce1d45977", "881aaf7b5", "eas7a436", "981o917f5",
+                  "2d28bd81a", "a42g5985d", "came0299", "e92k59727",
+                  "242r0e7b5", "bc265a560", "622b6a5d3", "ae3g7e7aa",
+                  "b01j07395", "68141a2df", "904545743", "0134c4568",
+                  "885t249e8", "ed442164b", "806fe4987", "0558da7f4",
+                  "3734334de", "636g6d8ca", "3252d86d1", "d67sbb99f",
+                  "0e1q9e209", "078e9d9eb"]
 
 
 class Test_IP(threading.Thread, object):
-    def __init__(self, queue_new, addr_dict):
+    def __init__(self, queue_new, proxy_li):
         threading.Thread.__init__(self)
         self.queue = queue_new
-        self.dict = addr_dict
+        self.proxy_li = proxy_li
 
     def run(self):
         addr_ip_and_port = self.queue.get()
@@ -42,81 +55,128 @@ class Test_IP(threading.Thread, object):
 
     def test_ip(self, addr_ip_and_port):
         test = addr_ip_and_port.split(":")
+        # res = telnetlib.Telnet(test[0], port=test[1], timeout=3)
+        # if res
         try:
             telnetlib.Telnet(test[0], port=test[1], timeout=3)
-        except Exception as e:
-            print("原因:", e)
+        except Exception:
+            # 在这里输出代理出错的ip，及其原因，所以不必要输出
+            pass
         else:
             print("IP 可用")
-        self.dict.append(addr_ip_and_port)
+            self.proxy_li.append(addr_ip_and_port)
+            print("IP 已添加")
 
 
-def read_page():
-    with open(os.getcwd()+'/proxy_pool/page.txt', 'r') as f:
-        result = f.readlines()
-    return result
+class Scrap_IP(threading.Thread):
+    def __init__(self, addr, ip_x, port_x, sta_x, sc, wn, rt, rts):
+        threading.Thread.__init__(self)
+        self.addr = addr
+        self.ip_x = ip_x
+        self.port_x = port_x
+        self.sta_x = sta_x
+        self.sc = sc
+        self.wn = wn
+        self.rt = rt
+        self.rts = rts
+
+    def run(self):
+        scrap_ip(self.addr, self.ip_x, self.port_x, self.sta_x,
+                 self.sc, self.wn, self.rt, self.rts)
 
 
-ihuan_page_list = read_page()
-
-
-def thread_run(addr_ip_and_port, addr_dict):
+def thread_run(addr_ip_and_port):
+    proxy_li = []
     queue_new = queue.Queue()
     for i in addr_ip_and_port:
         queue_new.put(i)
     for i in range(len(addr_ip_and_port)):
-        t = Test_IP(queue_new, addr_dict)
+        t = Test_IP(queue_new, proxy_li)
         t.setDaemon(True)
         t.start()
     queue_new.join()
+    return proxy_li
 
 
-def scrap_ip(address, ip_x, port_x, sta_x, scrap_count, website_name):
-    addr_dict_http = dict()
-    addr_dict_https = dict()
-    addr_dict_http[website_name] = []
-    addr_dict_https[website_name] = []
-    http_temp = []
-    https_temp = []
+def scrap_ip(address, ip_x, port_x, sta_x, sc, wn, rt, rts):
+    addr_mix = [[], []]
+    sta_li_check = ["yes", "HTTPS", "支持"]
+    lio = [4, 5, 6]
+    proxy_read = read_proxy()
     try:
-        for i in range(1, scrap_count):
-            s = requests.get((address + str(i)), headers=headers)
+        for i in range(0, sc):
+            if proxy_read is not None:
+                pro = {"http": "http://" + choice(proxy_read)}
+                s = requests.get((address + list_page_code[i]),
+                                 headers=headers, proxies=pro, timeout=10)
+            else:
+                s = requests.get((address + list_page_code[i]),
+                                 headers=headers, timeout=10)
             tree = html.fromstring(s.text)
             addr_ip = tree.xpath(ip_x)
             addr_port = tree.xpath(port_x)
             addr_sta = tree.xpath(sta_x)
             for j in range(len(addr_ip)):
                 address_temp = addr_ip[j] + ":" + addr_port[j]
-                if addr_sta[j] == "yes" or addr_sta[j] == "HTTPS":
-                    https_temp.append(address_temp)
+                if addr_sta[j] in sta_li_check:
+                    addr_mix[0].append(address_temp)
                 else:
-                    http_temp.append(address_temp)
-            time.sleep(2)
-        thread_run(http_temp, addr_dict_http[website_name])
-        thread_run(https_temp, addr_dict_https[website_name])
-        with open(os.getcwd()+'/proxy_pool/proxy_https.json', 'w') as f:
-            json.dump(addr_dict_https, f)
-            f.write("\n")
-        with open(os.getcwd()+'/proxy_pool/proxy_http.json', 'w') as f:
-            json.dump(addr_dict_http, f)
-            f.write("\n")
+                    addr_mix[1].append(address_temp)
+            print("-------------------------")
+            print("------读取完第{}页--------".format(str(i)))
+            time.sleep(choice(lio))
+        print("总共获取到{}个HTTPS类型的IP".format(len(addr_mix[0])))
+        print("总共获取到{}个HTTP类型的IP".format(len(addr_mix[1])))
+        thread_run(addr_mix[0])
+        thread_run(addr_mix[1])
+        print("提取到{}个HTTPS类型的IP".format(len(addr_mix[0])))
+        print("提取到{}个HTTP类型的IP".format(len(addr_mix[1])))
     except Exception as e:
         print("Reason:", e)
-    print(len(addr_dict_http['proxy']))
+    rt.extend(addr_mix[1])
+    rts.extend(addr_mix[0])
 
 
-def main():
-    try:
-        start = time.time()
-        for i in range(2):
-            _thread.start_new_thread(
-                scrap_ip(url_list[i], ip_xpa_list[i],
-                         port_xpa_list[i], sta_xpa_list[i],
-                         scrap_count=20, website_name="proxy"))
-        stop = time.time()
-        print(str(stop - start) + "秒")
-    except Exception as e:
-        print("出错:", e)
+def save_proxy():
+    proxy_dict = dict()
+    proxy_https_dict = dict()
+    th1_li = []
+    th1s_li = []
+    th1 = Scrap_IP(url_list[2], ip_xpa_list[2], port_xpa_list[2],
+                   sta_xpa_list[2], 20, "proxy", th1_li, th1s_li)
+    # th2 = Scrap_IP(url_list[1], ip_xpa_list[1],
+    #                port_xpa_list[1], sta_xpa_list[1],
+    #                25, "proxy")
+    #
+    start = time.time()
+    th1.start()
+    # th2.start()
+    th1.join()
+    # th2.join()
+    # save_proxy()
+    stop = time.time()
+    print(stop-start)
+    proxy_dict["proxy"] = th1_li
+    proxy_https_dict["proxy"] = th1s_li
+    with open(os.getcwd()+'/proxy_pool/proxy_http.json', 'w') as f:
+        json.dump(proxy_dict, f)
+        f.write("\n")
+    with open(os.getcwd()+'/proxy_pool/proxy_https.json', 'w') as f:
+        json.dump(proxy_https_dict, f)
+        f.write("\n")
 
 
-main()
+def read_proxy():
+    with open(os.getcwd()+'/proxy_pool/proxy_http.json', 'r') as f:
+        try:
+            read_dict_http = json.loads(f.readline())
+            result = read_dict_http["proxy"]
+            proxy = thread_run(result)
+            print("读取{}个可用IP".format(len(proxy)))
+            return proxy
+        except Exception as e:
+            print("Reason:", e)
+            return None
+
+
+save_proxy()
