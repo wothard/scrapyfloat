@@ -3,12 +3,13 @@
 
 
 import scrapy
+import os
 
 
 class GbrarSpider(scrapy.spiders.Spider):
     name = "gbrarcatch"
     start_urls = [
-        "http://rarbgprx.org/torrents.php?category=movies"
+        "https://rarbgprx.org/torrents.php?category=44%3B50%3B51%3B52%3B42&page=1"
         # "http://0.0.0.0:8000/ad.html"
     ]
 
@@ -16,10 +17,11 @@ class GbrarSpider(scrapy.spiders.Spider):
         self.title_xpa = '//a[@onmouseover]/text()'
         self.score_list_xpa = '//span[@style="color:DarkSlateGray"]/text()'
         self.id_xpa = '//a[contains(@href,"/torrent/")]'
+        self.ch_xpa = '//tr[@class="lista2"][{}]/td[2]/span/text()'
         # self.date_list_xpa = '//td[contains(@align,"center")
         # and contains(@width,"150px")]/text()'
         self.seli_xpa = '//td[@align="center" and @width="50px"]/font/text()'
-        self.tor_dict = dict()  # 地址字典（包含地址，健康度，评分）
+        self.tor_dict = dict()  # 地址字典（包含地址，健康度，评分)
 
     def parse(self, response):
         # all extract to list
@@ -27,6 +29,14 @@ class GbrarSpider(scrapy.spiders.Spider):
         title_l = response.xpath(self.title_xpa).extract()  # title
         id = (response.xpath(self.id_xpa)).xpath('@href').extract()  # id
         seed = response.xpath(self.seli_xpa).extract()  # seed
+        if (len(score_l) != len(title_l)):
+            for i in range(25):
+                test = response.xpath(self.ch_xpa.format(i+1)).extract()
+                if test is None:
+                    temp, score_l = score_l[i:], score_l[:i]
+                    score_l.append(0).extend(temp)
+                    print(len(score_l))
+                    break
         torrent_f = []  # 地址前缀
         for i in range(len(id)-8):
             te = id[i+8].split("torrent/")[-1]
@@ -51,4 +61,11 @@ class GbrarSpider(scrapy.spiders.Spider):
                         self.tor_dict[title] = [seed[i], address, score]
                 else:
                     self.tor_dict[title] = [seed[i], address, score]
+        next_pa = response.css('#pager_links a::attr("href")').extract_first()
+        print(next_pa)
+        next_f_url = response.urljoin(next_pa)
+        yield scrapy.Request(next_f_url, callback=self.parse)
+        with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/dianying.txt', 'a') as f:
+            for i in range(len(self.tor_dict)):
+                f.write(self.tor_dict[i])
         # print(len(seed), self.tor_dict, len(self.tor_dict))

@@ -6,6 +6,8 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import random
+from .proxylife import proxy
 
 
 class GbrarcatchSpiderMiddleware(object):
@@ -101,3 +103,15 @@ class GbrarcatchDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class ProxyMiddleware(object):
+    def __init__(self):
+        self.proxy_list = proxy.read_proxy()
+
+    def process_request(self, request, spider):
+        # proxy_list = proxy.read_proxy()
+        # print(proxy_list)self
+        proxy_single = random.choice(self.proxy_list)
+        request.meta['proxy'] = 'http://' + proxy_single
+        return request

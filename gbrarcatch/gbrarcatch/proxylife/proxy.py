@@ -134,7 +134,7 @@ def scrap_ip(scrap_info, rt, rts):
 
 
 def read_proxy():
-    with open(os.getcwd()+'/proxy_pool/proxy_http.json', 'r') as f:
+    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/proxy_http.json', 'r') as f:
         try:
             read_dict_http = json.loads(f.readline())
             result = read_dict_http["proxy"]
@@ -167,10 +167,10 @@ def save_proxy():
     print(stop-start)
     proxy_dict["proxy"] = th1_li
     proxy_https_dict["proxy"] = th1s_li
-    with open(os.getcwd()+'/proxy_pool/proxy_http.json', 'w') as f:
+    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/proxy_http.json', 'w') as f:
         json.dump(proxy_dict, f)
         f.write("\n")
-    with open(os.getcwd()+'/proxy_pool/proxy_https.json', 'w') as f:
+    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/proxy_https.json', 'w') as f:
         json.dump(proxy_https_dict, f)
         f.write("\n")
 
@@ -179,7 +179,7 @@ def save_proxy():
 
 def read_proxy():
     cv = []
-    with open(os.getcwd()+'/proxy_pool/vghj.txt', 'r') as f:
+    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/vghj.txt', 'r') as f:
         d = f.readlines()
     for i in d:
         cv.append(i.split("\n")[0])
