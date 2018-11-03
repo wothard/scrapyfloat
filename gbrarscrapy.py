@@ -6,7 +6,6 @@ import requests
 import os
 import random
 import time
-import proxy
 
 
 class Gbrarscrapy(object):
@@ -20,25 +19,22 @@ class Gbrarscrapy(object):
         self.seli_xpa = '//td[@align="center" and @width="50px"]/font/text()'
         self.tor_dict = dict()  # 地址字典（包含地址，健康度，评分)
         self.headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q='
-            + '0.9,image/webp,image/apng,*/*;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWe' +
-            'bKit/537.36 (KHTML, like Gecko) ' +
-            'Chrome/60.0.3112.113 Safari/537.36',
-            'Cookies': 'skt=gkyxehd1ym; gaDts48g=q8h5pp9t; skt=gkyxehd1ym; ' +
-            'gaDts48g=q8h5pp9t; aby=2; expla=1; tcc; ppu_main_9ef78edf998c4d' +
-            'f1e1636c9a474d9f47=1; ppu_sub_9ef78edf998c4df1e1636c9a474d9f' +
-            '47=1; ppu_delay_9ef78edf998c4df1e1636c9a474d9f47=1'
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=' +
+            '0.9,image/webp,image/apng,*/*;q=0.8',
+            'Cookies': 'skt=gkyxehd1ym; gaDts48g=q8h5pp9t; skt=gkyxehd1ym; gaDts48g=q8h5pp9t; aby=2; ppu_main_9ef78edf998c4df1e1636c9a474d9f47=1; expla=1; tcc; ppu_sub_9ef78edf998c4df1e1636c9a474d9f47=3'
         }
         self.url = url_li
         self.pro = proxy_single
+        self.user_agent = self.load_ua()
 
-    def run(self, rd):
+    def run(self):
         try:
-            # self.headers['User-Agent'] = random.choice(self.user_agent)
-            # pro = {"http": "http://" + random.choice(self.pro)}
+            temp_agent = random.choice(self.user_agent)
+            agent = temp_agent.split("\n")[0]
+            self.headers["User-Agent"] = agent
+            pro = {"http": "http://" + random.choice(self.pro)}
             s = requests.get(self.url, headers=self.headers,
-                             proxies=pro, timeout=1)
+                             proxies=pro, timeout=10)
             response = html.fromstring(s.text)
             title_l = response.xpath(self.title_xpa)  # title
             id = (response.xpath(self.id_xpa))  # id
@@ -86,7 +82,6 @@ class Gbrarscrapy(object):
             else:
                 self.tor_dict[title] = [str(seed), address, str(score)]
         else:
-            # print("test")
             self.tor_dict[title] = [str(seed), address, str(score)]
 
     def torrent_save(self):
@@ -104,10 +99,6 @@ class Gbrarscrapy(object):
             f.write(url)
             f.write("\n")
 
-
-url = ("https://rarbgprx.org/torrents.php?category=" +
-       "44%3B50%3B51%3B52%3B42&page=1")
-df = proxy.read_proxy(sele=1)
-for i in df:
-    pr = pro = {"http": "http://" + i}
-    Gbrarscrapy(url, df).run(pr)
+    def load_ua(self):
+        with open(os.getcwd()+'/data/user-agent.txt', 'r') as f:
+            return f.readlines()

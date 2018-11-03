@@ -15,9 +15,10 @@ class Scrapy_thread(threading.Thread, object):
         self.proxy = pl
 
     def run(self):
-        url_roll = self.queue.get()
-        gbrarscrapy.Gbrarscrapy(url_roll, self.proxy).run()
-        self.queue.task_done()
+        while 1:
+            url_roll = self.queue.get()
+            gbrarscrapy.Gbrarscrapy(url_roll, self.proxy).run()
+            self.queue.task_done()
 
 
 def ghost():
@@ -45,7 +46,7 @@ def ghost():
         if error_catch == "Y":
             for i in pages:
                 queue_ghost.put(i.split("\n")[0])
-    for i in range(20):
+    for i in range(1000):
         t = Scrapy_thread(queue_ghost, pro_li)
         t.setDaemon(True)
         t.start()
