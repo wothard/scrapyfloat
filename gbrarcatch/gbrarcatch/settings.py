@@ -21,7 +21,7 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
-# DEPTH_LIMIT = 1000
+DEPTH_LIMIT = 1000
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -56,7 +56,7 @@ ROBOTSTXT_OBEY = True
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
    'gbrarcatch.middlewares.GbrarcatchDownloaderMiddleware': 543,
-   # 'gbrarcatch.middlewares.ProxyMiddleware': 750,
+   'gbrarcatch.middlewares.ProxyMiddleware': 750,
    # 'scrapy.spidermiddlewares.depth.DepthMiddleware': 1000,
 }
 

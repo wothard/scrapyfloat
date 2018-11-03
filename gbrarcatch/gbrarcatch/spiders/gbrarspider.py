@@ -32,10 +32,10 @@ class GbrarSpider(scrapy.spiders.Spider):
         if (len(score_l) != len(title_l)):
             for i in range(25):
                 test = response.xpath(self.ch_xpa.format(i+1)).extract()
-                if test is None:
+                if not test:
                     temp, score_l = score_l[i:], score_l[:i]
-                    score_l.append(0).extend(temp)
-                    print(len(score_l))
+                    score_l.append("NO Data")
+                    score_l.extend(temp)
                     break
         torrent_f = []  # 地址前缀
         for i in range(len(id)-8):
@@ -61,11 +61,18 @@ class GbrarSpider(scrapy.spiders.Spider):
                         self.tor_dict[title] = [seed[i], address, score]
                 else:
                     self.tor_dict[title] = [seed[i], address, score]
-        next_pa = response.css('#pager_links a::attr("href")').extract_first()
-        print(next_pa)
-        next_f_url = response.urljoin(next_pa)
-        yield scrapy.Request(next_f_url, callback=self.parse)
-        with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/dianying.txt', 'a') as f:
-            for i in range(len(self.tor_dict)):
-                f.write(self.tor_dict[i])
+        # next_pa = response.css('#pager_links a::attr("href")').extract_first()
+        # print(next_pa)
+        # next_f_url = response.urljoin(next_pa)
+        # yield scrapy.Request(next_f_url, callback=self.parse)
+        if self.tor_dict is not None:
+            with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/dianying.txt', 'a') as f:
+                for (i, j) in self.tor_dict.items():
+                    f.write(i)
+                    for k in j:
+                        print(k)
+                        # f.write(k)
+
+                # f.write(self.tor_dict.keys)
+                # f.write(self.tor_dict.values)
         # print(len(seed), self.tor_dict, len(self.tor_dict))

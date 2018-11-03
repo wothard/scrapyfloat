@@ -67,9 +67,8 @@ class Test_IP(threading.Thread, object):
             # 在这里输出代理出错的ip，及其原因，所以不必要输出
             pass
         else:
-            print("IP 可用")
             self.proxy_li.append(addr_ip_and_port)
-            print("IP 已添加")
+            # print("可用")
 
 
 class Scrap_IP(threading.Thread):
@@ -88,7 +87,7 @@ def thread_run(addr_ip_and_port):
     queue_new = queue.Queue()
     for i in addr_ip_and_port:
         queue_new.put(i)
-    for i in range(len(addr_ip_and_port)):
+    for i in range(500):
         t = Test_IP(queue_new, proxy_li)
         t.setDaemon(True)
         t.start()
@@ -133,19 +132,6 @@ def scrap_ip(scrap_info, rt, rts):
     rts.extend(addr_mix[0])
 
 
-def read_proxy():
-    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/proxy_http.json', 'r') as f:
-        try:
-            read_dict_http = json.loads(f.readline())
-            result = read_dict_http["proxy"]
-            proxy = thread_run(result)
-            print("读取{}个可用IP".format(len(proxy)))
-            return proxy
-        except Exception as e:
-            print("Reason:", e)
-            return None
-
-
 def save_proxy():
     proxy_dict = dict()
     proxy_https_dict = dict()
@@ -167,21 +153,20 @@ def save_proxy():
     print(stop-start)
     proxy_dict["proxy"] = th1_li
     proxy_https_dict["proxy"] = th1s_li
-    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/proxy_http.json', 'w') as f:
+    with open(os.getcwd()+'/proxy_pool/proxy_http.json', 'w') as f:
         json.dump(proxy_dict, f)
         f.write("\n")
-    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/proxy_https.json', 'w') as f:
+    with open(os.getcwd()+'/proxy_pool/proxy_https.json', 'w') as f:
         json.dump(proxy_https_dict, f)
         f.write("\n")
 
 
-# save_proxy()
-
-def read_proxy():
+def read_proxy(sele):
     cv = []
-    with open(os.getcwd()+'/gbrarcatch/proxylife/proxy_pool/vghj.txt', 'r') as f:
+    with open(os.getcwd()+'/proxy_pool/pro_{}.txt'.format(sele), 'r') as f:
         d = f.readlines()
     for i in d:
         cv.append(i.split("\n")[0])
-    aa = thread_run(cv)
-    return aa
+    use_ip = thread_run(cv)
+    print("总共可用IP：{}个".format(len(use_ip)))
+    return use_ip

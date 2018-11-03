@@ -111,7 +111,7 @@ class ProxyMiddleware(object):
 
     def process_request(self, request, spider):
         # proxy_list = proxy.read_proxy()
-        # print(proxy_list)self
+        # print(proxy_list)
         proxy_single = random.choice(self.proxy_list)
         request.meta['proxy'] = 'http://' + proxy_single
         return request
