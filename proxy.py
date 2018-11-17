@@ -162,7 +162,7 @@ def save_proxy(num, whe):
 
 def read_proxy():
     use_ip = list()
-    for i in range(6):
+    for i in range(3):
         cv = []
         # print("输入数字，选择代理列表: ", end="")
         # sele = input()

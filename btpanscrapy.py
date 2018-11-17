@@ -32,7 +32,6 @@ class Btpanscrapy(object):
     def run(self):
         result = None
         while True:
-            print(self.url)
             pro = {"http": "http://" + random.choice(self.pro)}
             try:
                 temp_agent = random.choice(self.user_agent)
@@ -45,11 +44,11 @@ class Btpanscrapy(object):
                 result = self.doubanlink(response=response)
                 return result
                 break
-            except requests.ConnectTimeout as e:
+            except requests.ConnectTimeout:
                 pass
-            except requests.ReadTimeout as e:
+            except requests.ReadTimeout:
                 pass
-            except requests.HTTPError as e:
+            except requests.HTTPError:
                 pass
             except requests.exceptions.ProxyError:
                 time.sleep(5)
@@ -63,17 +62,13 @@ class Btpanscrapy(object):
             except requests.exceptions.ChunkedEncodingError:
                 pass
             except lxml.etree.ParserError:
-                print(self.url, "+++++++++++++++++++++++")
-                with open(os.getcwd()+'/data/error_page.txt', 'a') as f:
-                    f.write(self.url)
-                    f.write("\n")
+                pass
             except Exception as e:
                 print("其他：", type(e), e)
 
     def doubanlink(self, response):
         dblink = response.xpath(self.dl_xpa)
         print(self.url, ">>>>>>>>>>>>>>>>>>", dblink[0])
-        # print(dblink[0])
         return dblink[0]
 
     def btlink(self, response):

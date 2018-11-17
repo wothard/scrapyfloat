@@ -39,9 +39,9 @@ def startbt():
     # for i in range(1, 1073):
     #     i = "http://www.btpan.com/film/?page={}".format(i)
     #     queue_bt.put(i)
-    for i in btlink[:1000]:
+    for i in btlink:
         queue_bt.put(i.split("\n")[0])
-    for i in range(400):
+    for i in range(500):
         t = Scrapy_thread(queue_bt, proxy_list)
         t.setDaemon(True)
         t.start()
