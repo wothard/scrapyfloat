@@ -25,9 +25,7 @@ def ghost():
     queue_ghost = queue.Queue()
     url = ("https://rarbgprx.org/torrents.php?category=" +
            "44%3B50%3B51%3B52%3B42&page=")
-    print("输入数字，选择代理列表: ", end="")
-    pro_list_sele = input()
-    pro_li = proxy.read_proxy(str(pro_list_sele))
+    pro_li = proxy.read_proxy()
     print("爬新输入1，爬旧输入2：", end="")
     main = input()
     if int(main) == 1:

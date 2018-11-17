@@ -6,6 +6,7 @@ import requests
 import os
 import random
 import time
+from fake_agent import fakeagent
 
 
 class Gbrarscrapy(object):
@@ -25,7 +26,7 @@ class Gbrarscrapy(object):
         }
         self.url = url_li
         self.pro = proxy_single
-        self.user_agent = self.load_ua()
+        self.user_agent = fakeagent.load_ua()
 
     def run(self):
         try:
@@ -98,7 +99,3 @@ class Gbrarscrapy(object):
         with open(os.getcwd()+'/data/error_page_1.txt', 'a') as f:
             f.write(url)
             f.write("\n")
-
-    def load_ua(self):
-        with open(os.getcwd()+'/data/user-agent.txt', 'r') as f:
-            return f.readlines()

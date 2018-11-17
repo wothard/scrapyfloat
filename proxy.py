@@ -160,15 +160,20 @@ def save_proxy(num, whe):
         f.write("\n")
 
 
-def read_proxy(sele):
-    cv = []
-    with open(os.getcwd()+'/proxy_pool/ip_{}.txt'.format(sele), 'r') as f:
-        d = f.readlines()
-    for i in d:
-        cv.append(i.split("\n")[0])
-    use_ip = thread_run(cv)
-    print("总共可用IP：{}个".format(len(use_ip)))
+def read_proxy():
+    use_ip = list()
+    for i in range(6):
+        cv = []
+        # print("输入数字，选择代理列表: ", end="")
+        # sele = input()
+        sele = i+1
+        with open(os.getcwd()+'/proxy_pool/ip_{}.txt'.format(sele), 'r') as f:
+            d = f.readlines()
+        for i in d:
+            cv.append(i.split("\n")[0])
+        use_ip.extend(thread_run(cv))
+        print("总共可用IP：{}个".format(len(use_ip)))
     return use_ip
 
 
-save_proxy(25, 1)
+# save_proxy(25, 1)
