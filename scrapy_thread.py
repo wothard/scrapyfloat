@@ -5,11 +5,15 @@ import threading
 import queue
 import os
 import json
-import gbrarscrapy
-import doubanscrapy
 import proxy
+from initscrapy import Ingscrapy
+# import gbrarscrapy
+# import doubanscrapy
 
 
+'''写一个或多个全局列表(字典)，保存数据，并将内容写入文件'''
+# temp_dict = dict()
+temp_list = list()
 score_dict = dict()
 
 
@@ -20,11 +24,15 @@ class Scrapy_thread(threading.Thread, object):
         self.proxies = proxies
 
     def run(self):
+        '''在 while 循环写入需要执行的爬虫'''
         while 1:
             url_roll = self.queue.get()
+            result = Ingscrapy(url_roll, self.proxies).run()
+            # temp_dict[result[1]] = result[0]
+            temp_list.append(result)
             # a = doubanscrapy.Doubanscrapy(url_roll, self.proxies).run()
             # score_dict[a[1]] = a[0]
-            gbrarscrapy.Gbrarscrapy(url_roll, self.proxies).run()
+            # gbrarscrapy.Gbrarscrapy(url_roll, self.proxies).run()
             self.queue.task_done()
 
 
@@ -77,14 +85,15 @@ def load_ep():
         return page2
 
 
-ghost()
+# ghost()
 
 
 def read_url():
+    ''' 读取抓取的url列表 '''
     url = list()
-    with open(os.getcwd()+'/data/doub3.txt', 'r') as f:
+    with open(os.getcwd()+'/data/win.txt', 'r') as f:
         for i in f.readlines():
-            temp = (i.split("\n")[0]).split(",")[1]
+            temp = (i.split("\n")[0])
             url.append(temp)
     return url
 
@@ -109,31 +118,41 @@ def convert():
 
 
 def thread_start():
+    '''线程创建和启动的函数'''
     queue_in = queue.Queue()
-    # 读取 url 列表
-    url = read_url()
-    for i in url[:1]:
-        queue_in.put(i)
+    # 读取 url 列表， 或者根据 url 规则创建列表
+    for i in range(1, 3):
+        url = "https://www.weifengz.com/tag/5aWX5Zu-0/{}".format(i)
+        queue_in.put(url)
+    # url = read_url()
+    # for i in url[15000:]:
+    #     ue = "https://www.weifengz.com" + i
+    #     queue_in.put(ue)
     # 读取代理
     proxies = proxy.read_proxy()
-    # 开启线程
-    for i in range(1):
+    # 开启线程， range() 中的数字代表线程数
+    for i in range(100):
         t = Scrapy_thread(queue_in, proxies)
         t.setDaemon(True)
         t.start()
     queue_in.join()
+    # save_data()
 
 
-def save_json():
+def save_data():
     print("开始写入文件。。。。。")
-    with open(os.getcwd()+'/data/score.json', 'a') as f:
-        json.dump(score_dict, f)
-        f.write("\n")
+    # 如果是写 json 文件则修改此代码
+    # with open(os.getcwd()+'/data/score.json', 'a') as f:
+    #     json.dump(score_dict, f)
+    #     f.write("\n")
+    # 如果写 txt 文件则修改此代码
+    with open(os.getcwd()+'/data/pan.txt', 'a') as f:
+        for i in temp_list:
+            for j in i:
+                f.write(j)
+                f.write(",")
+            f.write("\n")
 
 
-# thread_start()
-# convert()
-# save_json()
-# print(score_dict)
-# convert()
-# read_url()
+thread_start()
+print(temp_list)

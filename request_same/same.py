@@ -6,13 +6,11 @@ import requests
 import lxml
 
 
-def same_request(url, agent, headers, proxy):
+def same_request(url, agent, headers, proxies):
     temp_agent = (random.choice(agent)).split("\n")[0]
     headers["User-Agent"] = temp_agent
-    s = requests.get(url, headers=headers, proxies=proxy, timeout=4)
-    print(s.text)
-    if s.status_code == 403:
-        raise Warning
+    proxy = {"http": "http://" + random.choice(proxies)}
+    s = requests.get(url, headers=headers, proxies=proxy, timeout=8)
     s.encoding = "utf-8"
     response = lxml.html.fromstring(s.text)
     return response
