@@ -6,8 +6,6 @@ import lxml
 from fake_agent import fakeagent
 import requests
 import random
-import os
-import time
 
 
 class Btpanscrapy(object):
@@ -42,34 +40,44 @@ class Btpanscrapy(object):
                 s.encoding = "utf-8"
                 response = lxml.html.fromstring(s.text)
                 result = self.doubanlink(response=response)
-                return result
+                # result = self.btflink(response)
+                return (self.url, result)
                 break
-            except requests.ConnectTimeout:
+            # except requests.ConnectTimeout:
+            #     pass
+            # except requests.ReadTimeout:
+            #     pass
+            # except requests.HTTPError:
+            #     pass
+            # except requests.exceptions.ProxyError:
+            #     time.sleep(5)
+            #     pass
+            # except requests.exceptions.ConnectionError:
+            #     pass
+            # except requests.TooManyRedirects:
+            #     pass
+            # except IndexError:
+            #     pass
+            # except requests.exceptions.ChunkedEncodingError:
+            #     pass
+            # except lxml.etree.ParserError:
+            #     pass
+            except Exception:
                 pass
-            except requests.ReadTimeout:
-                pass
-            except requests.HTTPError:
-                pass
-            except requests.exceptions.ProxyError:
-                time.sleep(5)
-                pass
-            except requests.exceptions.ConnectionError:
-                pass
-            except requests.TooManyRedirects:
-                pass
-            except IndexError:
-                pass
-            except requests.exceptions.ChunkedEncodingError:
-                pass
-            except lxml.etree.ParserError:
-                pass
-            except Exception as e:
-                print("其他：", type(e), e)
+                # print("其他：", type(e), e)
 
     def doubanlink(self, response):
-        dblink = response.xpath(self.dl_xpa)
-        print(self.url, ">>>>>>>>>>>>>>>>>>", dblink[0])
-        return dblink[0]
+        temp_dict = dict()
+        title = '//h2[@class="ftitle"]/text()'
+        tor = '//ul[@class="ul_tor"]/li/a/@href'
+        tor_name = '//ul[@class="ul_tor"]/li/a/span/text()'
+        ti = response.xpath(title)
+        to = response.xpath(tor)
+        to_name = response.xpath(tor_name)
+        temp_dict["name"] = ti[0]
+        temp_dict["size"] = to_name
+        temp_dict["link"] = to
+        return temp_dict
 
     def btlink(self, response):
         title_l = response.xpath(self.title_xpa)

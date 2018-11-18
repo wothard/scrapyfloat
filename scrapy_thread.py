@@ -4,20 +4,27 @@
 import threading
 import queue
 import os
+import json
 import gbrarscrapy
+import doubanscrapy
 import proxy
 
 
+score_dict = dict()
+
+
 class Scrapy_thread(threading.Thread, object):
-    def __init__(self, queue_ghost, pl):
+    def __init__(self, queue_in, proxies):
         threading.Thread.__init__(self)
-        self.queue = queue_ghost
-        self.proxy = pl
+        self.queue = queue_in
+        self.proxies = proxies
 
     def run(self):
         while 1:
             url_roll = self.queue.get()
-            gbrarscrapy.Gbrarscrapy(url_roll, self.proxy).run()
+            # a = doubanscrapy.Doubanscrapy(url_roll, self.proxies).run()
+            # score_dict[a[1]] = a[0]
+            gbrarscrapy.Gbrarscrapy(url_roll, self.proxies).run()
             self.queue.task_done()
 
 
@@ -44,7 +51,7 @@ def ghost():
         if error_catch == "Y":
             for i in pages:
                 queue_ghost.put(i.split("\n")[0])
-    for i in range(1000):
+    for i in range(100):
         t = Scrapy_thread(queue_ghost, pro_li)
         t.setDaemon(True)
         t.start()
@@ -72,4 +79,61 @@ def load_ep():
 
 ghost()
 
-# print(load_ep())
+
+def read_url():
+    url = list()
+    with open(os.getcwd()+'/data/doub3.txt', 'r') as f:
+        for i in f.readlines():
+            temp = (i.split("\n")[0]).split(",")[1]
+            url.append(temp)
+    return url
+
+
+def read_url2():
+    url = list()
+    with open(os.getcwd()+'/data/doub3.txt', 'r') as f:
+        for i in f.readlines():
+            temp = (i.split("\n")[0]).split(",")
+            url.append(temp)
+    return url
+
+
+def convert():
+    all = dict()
+    readurl = read_url2()
+    for i in readurl:
+        all[i[1]] = i[0]
+    for i in score_dict.keys():
+        if i in all:
+            score_dict[i].append(all[i])
+
+
+def thread_start():
+    queue_in = queue.Queue()
+    # 读取 url 列表
+    url = read_url()
+    for i in url[:1]:
+        queue_in.put(i)
+    # 读取代理
+    proxies = proxy.read_proxy()
+    # 开启线程
+    for i in range(1):
+        t = Scrapy_thread(queue_in, proxies)
+        t.setDaemon(True)
+        t.start()
+    queue_in.join()
+
+
+def save_json():
+    print("开始写入文件。。。。。")
+    with open(os.getcwd()+'/data/score.json', 'a') as f:
+        json.dump(score_dict, f)
+        f.write("\n")
+
+
+# thread_start()
+# convert()
+# save_json()
+# print(score_dict)
+# convert()
+# read_url()

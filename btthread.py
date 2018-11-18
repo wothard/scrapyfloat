@@ -6,11 +6,13 @@ import queue
 import proxy
 import btpanscrapy
 import os
-
+import json
 
 up_list = list()
 down_list = list()
 douban_list = list()
+down = list()
+fuck_dict = dict()
 
 
 class Scrapy_thread(threading.Thread, object):
@@ -22,13 +24,8 @@ class Scrapy_thread(threading.Thread, object):
     def run(self):
         while 1:
             url_roll = self.queue.get()
-            # btpanscrapy.Btpanscrapy(url_roll).run()
             result = btpanscrapy.Btpanscrapy(url_roll, self.proxy).run()
-            douban_list.append(result)
-            # btpanscrapy.Btpanscrapy(url_roll, self.proxy).run()
-            # result = btpanscrapy.Btpanscrapy(url_roll, self.proxy).run()
-            # up_list.append(result[0])
-            # down_list.append(result[1])
+            fuck_dict[result[0]] = result[1]
             self.queue.task_done()
 
 
@@ -36,10 +33,7 @@ def startbt():
     queue_bt = queue.Queue()
     proxy_list = proxy.read_proxy()
     btlink = read_btlink()
-    # for i in range(1, 1073):
-    #     i = "http://www.btpan.com/film/?page={}".format(i)
-    #     queue_bt.put(i)
-    for i in btlink:
+    for i in btlink[8000:]:
         queue_bt.put(i.split("\n")[0])
     for i in range(500):
         t = Scrapy_thread(queue_bt, proxy_list)
@@ -49,6 +43,7 @@ def startbt():
 
 
 def save_dict():
+    print("开始写入文件")
     with open(os.getcwd()+'/data/up.txt', 'w') as f:
         for i in up_list:
             for j, k in i.items():
@@ -65,26 +60,31 @@ def save_dict():
                 f2.write("\n")
 
 
-def douban_save():
+# 将所有的 btpan 链接获取其 种子地址，电影名称，种子大小 封装成字典
+# 后面添加豆瓣评分和评论数
+
+
+def save_json():
     print("开始写入文件。。。。。")
-    with open(os.getcwd()+'/data/doub2.txt', 'a') as f:
-        for i in douban_list:
-            if i is None:
-                f.write("NONE")
-            else:
-                f.write(i)
-            f.write("\n")
+    with open(os.getcwd()+'/data/result.json', 'a') as f:
+        json.dump(fuck_dict, f)
+        f.write("\n")
+
+
+def load_json():
+    with open(os.getcwd()+'/data/result.json', 'r') as f:
+        da = json.load(f)
+        for k, v in da.items():
+            print(k, v)
 
 
 def read_btlink():
     btlink_li = list()
-    with open(os.getcwd()+'/data/up.txt', 'r') as f:
+    with open(os.getcwd()+'/data/doub3.txt', 'r') as f:
         for i in f.readlines():
-            btlink_li.append(i.split(",")[1])
+            btlink_li.append(i.split(",")[0])
     return btlink_li
 
 
-# read_btlink()
 startbt()
-douban_save()
-# save_dict()
+save_json()
