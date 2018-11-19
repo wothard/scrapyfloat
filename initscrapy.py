@@ -32,13 +32,19 @@ class Ingscrapy(object):
                 return result
             except requests.exceptions.ReadTimeout:
                 pass
-            except Exception as e:
-                print(type(e), e)
+            # except Exception as e:
+            #     print(type(e), e)
+            except Exception:
+                pass
 
     def analysis(self, response):
         '''将获取到的网页转换成字符串后，提取所需内容'''
-        result = wind.listdetail(response)
-        return result
+        link_l = '//h3/a[2]/@href'
+        link = response.xpath(link_l)
+        print(link[0])
+        return link[0]
+        # result = wind.listdetail(response)
+        # return result
         # temp_li = list()
         # link_l = response.xpath(self.temp_xpa2)
         # for i in link_l:

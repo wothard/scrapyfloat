@@ -91,7 +91,7 @@ def load_ep():
 def read_url():
     ''' 读取抓取的url列表 '''
     url = list()
-    with open(os.getcwd()+'/data/win.txt', 'r') as f:
+    with open(os.getcwd()+'/data/mzt.txt', 'r') as f:
         for i in f.readlines():
             temp = (i.split("\n")[0])
             url.append(temp)
@@ -121,22 +121,22 @@ def thread_start():
     '''线程创建和启动的函数'''
     queue_in = queue.Queue()
     # 读取 url 列表， 或者根据 url 规则创建列表
-    for i in range(1, 3):
-        url = "https://www.weifengz.com/tag/5aWX5Zu-0/{}".format(i)
-        queue_in.put(url)
-    # url = read_url()
-    # for i in url[15000:]:
-    #     ue = "https://www.weifengz.com" + i
-    #     queue_in.put(ue)
+    # for i in range(400, 454):
+    #     url = "https://www.meinvtu123.net/a/cn/list_2_{}.html".format(i)
+    #     queue_in.put(url)
+    url = read_url()
+    for i in url[:10]:
+        # ue = "https://www.weifengz.com" + i
+        queue_in.put(i)
     # 读取代理
     proxies = proxy.read_proxy()
     # 开启线程， range() 中的数字代表线程数
-    for i in range(100):
+    for i in range(10):
         t = Scrapy_thread(queue_in, proxies)
         t.setDaemon(True)
         t.start()
     queue_in.join()
-    # save_data()
+    save_data()
 
 
 def save_data():
@@ -146,13 +146,14 @@ def save_data():
     #     json.dump(score_dict, f)
     #     f.write("\n")
     # 如果写 txt 文件则修改此代码
-    with open(os.getcwd()+'/data/pan.txt', 'a') as f:
+    with open(os.getcwd()+'/data/mztnew.txt', 'a') as f:
         for i in temp_list:
-            for j in i:
-                f.write(j)
-                f.write(",")
+            f.write(i)
+            # for j in i:
+            #     f.write(j)
+            # f.write(",")
             f.write("\n")
 
 
 thread_start()
-print(temp_list)
+# print(temp_list)
