@@ -30,6 +30,7 @@ class Scrapy_thread(threading.Thread, object):
             result = Ingscrapy(url_roll, self.proxies).run()
             # temp_dict[result[1]] = result[0]
             temp_list.append(result)
+            # temp_list.extend(result)
             # a = doubanscrapy.Doubanscrapy(url_roll, self.proxies).run()
             # score_dict[a[1]] = a[0]
             # gbrarscrapy.Gbrarscrapy(url_roll, self.proxies).run()
@@ -91,7 +92,7 @@ def load_ep():
 def read_url():
     ''' 读取抓取的url列表 '''
     url = list()
-    with open(os.getcwd()+'/data/mzt.txt', 'r') as f:
+    with open(os.getcwd()+'/data/fairone.txt', 'r') as f:
         for i in f.readlines():
             temp = (i.split("\n")[0])
             url.append(temp)
@@ -125,13 +126,15 @@ def thread_start():
     #     url = "https://www.meinvtu123.net/a/cn/list_2_{}.html".format(i)
     #     queue_in.put(url)
     url = read_url()
-    for i in url[:10]:
+    for i in url[:100]:
         # ue = "https://www.weifengz.com" + i
+        # ue = "https://www.meinvtu123.net/a/cn/list_2_{}.html".format(i+1)
+        # queue_in.put(ue)
         queue_in.put(i)
     # 读取代理
     proxies = proxy.read_proxy()
     # 开启线程， range() 中的数字代表线程数
-    for i in range(10):
+    for i in range(50):
         t = Scrapy_thread(queue_in, proxies)
         t.setDaemon(True)
         t.start()
@@ -146,7 +149,7 @@ def save_data():
     #     json.dump(score_dict, f)
     #     f.write("\n")
     # 如果写 txt 文件则修改此代码
-    with open(os.getcwd()+'/data/mztnew.txt', 'a') as f:
+    with open(os.getcwd()+'/data/faironeaddr.txt', 'a') as f:
         for i in temp_list:
             f.write(i)
             # for j in i:

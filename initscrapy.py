@@ -3,7 +3,7 @@
 
 from fake_agent import fakeagent
 from request_same.same import same_request
-from daily_update import wind
+from daily_update import fairone
 import requests
 
 
@@ -29,13 +29,14 @@ class Ingscrapy(object):
                     self.headers, self.proxies
                     )
                 result = self.analysis(response)
+                # result = fairone.page_detail(response)
                 return result
             except requests.exceptions.ReadTimeout:
                 pass
             # except Exception as e:
             #     print(type(e), e)
-            except Exception:
-                pass
+            except Exception as e:
+                print(e)
 
     def analysis(self, response):
         '''将获取到的网页转换成字符串后，提取所需内容'''

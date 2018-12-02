@@ -68,7 +68,6 @@ class Gbrarscrapy(object):
                 print(self.url)
                 self.error_save_page(self.url)
 
-
     def torent_front(self, id):
         torrent_f = []  # 地址前缀
         for i in range(len(id) - 8):
