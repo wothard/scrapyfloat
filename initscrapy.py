@@ -4,6 +4,7 @@
 from fake_agent import fakeagent
 from request_same.same import same_request
 from daily_update import fairone
+from film_update import gbrar
 import requests
 
 
@@ -24,11 +25,13 @@ class Ingscrapy(object):
         result = None
         while 1:
             try:
+                self.headers['Cookies'] = gbrar.Gbrarscrapy().cookie()
                 response = same_request(
                     self.url, self.user_agent,
                     self.headers, self.proxies
                     )
-                result = self.analysis(response)
+                # result = self.analysis(response)
+                result = gbrar.Gbrarscrapy().carry(response)
                 # result = fairone.page_detail(response)
                 return result
             except requests.exceptions.ReadTimeout:

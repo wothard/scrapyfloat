@@ -125,21 +125,22 @@ def thread_start():
     # for i in range(400, 454):
     #     url = "https://www.meinvtu123.net/a/cn/list_2_{}.html".format(i)
     #     queue_in.put(url)
-    url = read_url()
-    for i in url[:100]:
+    # url = read_url()
+    for i in range(4):
+        ur = "https://rarbgprx.org/torrents.php?category=44%3B42%3B46&order=seeders&by=DESC&page={}".format(i)
         # ue = "https://www.weifengz.com" + i
         # ue = "https://www.meinvtu123.net/a/cn/list_2_{}.html".format(i+1)
         # queue_in.put(ue)
-        queue_in.put(i)
+        queue_in.put(ur)
     # 读取代理
     proxies = proxy.read_proxy()
     # 开启线程， range() 中的数字代表线程数
-    for i in range(50):
+    for i in range(2):
         t = Scrapy_thread(queue_in, proxies)
         t.setDaemon(True)
         t.start()
     queue_in.join()
-    save_data()
+    # save_data()
 
 
 def save_data():
@@ -159,4 +160,4 @@ def save_data():
 
 
 thread_start()
-# print(temp_list)
+print(temp_list)
